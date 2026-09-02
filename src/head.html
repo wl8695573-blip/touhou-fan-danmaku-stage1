@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#05080f">
+<title>东方幻想乡弹幕 · 一面（同人练习 STG · 电脑/手机）</title>
+<style>
+  :root{
+    --ink:#e8f4ff; --acc:#ffd75e; --cyan:#7fd4ff; --line:#7fd4ff88;
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  html,body{height:100%;}
+  html{overflow:hidden;}
+  body{
+    position:fixed; left:0; top:0; right:0; bottom:0;
+    background:#05080f radial-gradient(1200px 700px at 50% -10%, #10223d 0%, #05080f 70%);
+    color:var(--ink);
+    font-family:"Microsoft YaHei","PingFang SC","Noto Sans CJK SC",sans-serif;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden; user-select:none; -webkit-user-select:none;
+    -webkit-touch-callout:none; overscroll-behavior:none; touch-action:none;
+  }
+  #wrap{
+    position:relative; background:#000; overflow:hidden;
+    width:min(96vw, calc(88vh*0.75 - 12px)); aspect-ratio:480/640;
+    border:2px solid #2b5c8a; border-radius:8px;
+    box-shadow:0 0 30px #1d4a7a66, 0 0 90px #0b2a4a44;
+    touch-action:none;
+  }
+  body.port #wrap{
+    width:100vw; height:100vh; height:100dvh;
+    border:none; border-radius:0; box-shadow:none;
+  }
+  #cv{width:100%; height:100%; display:block;}
+  #tc{position:absolute; inset:0; z-index:3; pointer-events:none; display:none;}
+  #tc button{
+    pointer-events:auto; position:absolute; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:1px;
+    border:2px solid #9fc7e8aa; color:#eaf4ff; touch-action:none;
+    background:radial-gradient(circle at 35% 30%, #1c3f6acc, #0a1c33dd);
+    box-shadow:0 2px 14px #000a; cursor:pointer;
+    font-family:inherit; font-weight:600;
+    border-radius:50%; width:84px; height:84px;
+    right:12px; bottom:calc(14px + env(safe-area-inset-bottom,0px));
+    font-size:15px; letter-spacing:1px;
+  }
+  #tc button:active{transform:scale(.93); background:radial-gradient(circle at 35% 30%, #2a5a9add, #12305add);}
+  #tc #bBombN{font-size:13px; color:var(--acc); font-weight:700;}
+  #tc #bBomb.zero{opacity:.35; filter:saturate(.3);}
+  #tc #bPauseT{
+    border-radius:18px; width:64px; height:34px; font-size:13px;
+    right:16px; bottom:calc(112px + env(safe-area-inset-bottom,0px));
+  }
+  .scn{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:rgba(3,8,18,.66); z-index:5;
+  }
+  .scn.hidden{display:none;}
+  .panel{
+    width:86%; max-width:430px; max-height:94%; overflow-y:auto; padding:14px 18px 16px;
+    background:linear-gradient(180deg,#0b1b33f2,#081226f2);
+    border:2px solid var(--line); border-radius:14px;
+    box-shadow:0 0 24px #0008, inset 0 0 40px #123c6a33;
+    text-align:center; touch-action:auto;
+  }
+  h1.logo{
+    font-size:30px; letter-spacing:3px; color:var(--acc);
+    text-shadow:0 0 14px #ffd75e66, 0 2px 0 #000;
+  }
+  .sub{font-size:13px; color:var(--cyan); margin:2px 0 10px; opacity:.9;}
+  .cards{display:flex; gap:8px; justify-content:center; margin:6px 0 10px;}
+  .card{
+    width:31%; background:#0a1a30; border:2px solid #23507f; border-radius:10px;
+    padding:6px 4px 6px; cursor:pointer; transition:.12s; touch-action:manipulation;
+  }
+  .card:hover{transform:translateY(-2px); border-color:#4d9cd9;}
+  .card.on{border-color:var(--acc); box-shadow:0 0 12px #ffd75e55; background:#12294a;}
+  .card canvas{width:100%; height:auto; image-rendering:auto; display:block;}
+  .cname{font-size:15px; margin-top:4px;}
+  .cd{font-size:11px; color:#9fc7e8; min-height:30px; margin-top:2px; line-height:1.45;}
+  .btns{display:flex; flex-direction:column; gap:8px; margin-top:6px;}
+  .row{display:flex; gap:8px; justify-content:center;}
+  .btn{
+    flex:1; cursor:pointer; color:var(--ink); font-family:inherit; font-size:16px;
+    padding:9px 10px; border-radius:8px; border:1px solid #2f6fae;
+    background:linear-gradient(180deg,#12375f,#0c2645); touch-action:manipulation;
+  }
+  .btn:hover{background:linear-gradient(180deg,#1b4a7c,#123c66); border-color:#4d9cd9;}
+  .btn:active{transform:scale(.97);}
+  .btn.big{font-size:19px; letter-spacing:4px; color:var(--acc); border-color:#c9a33a;}
+  .btn.mini{font-size:13px; padding:6px 6px;}
+  .help{font-size:12.5px; color:#bcdcf5; text-align:left; background:#08182e; border:1px dashed #2f6fae; border-radius:8px; padding:8px 12px; line-height:1.75; margin-top:10px;}
+  .help b{color:var(--acc);}
+  .ver{margin-top:10px; font-size:11px; color:#5c83a6; line-height:1.7;}
+  .settingRow{display:flex; align-items:center; gap:10px; margin:9px 0; font-size:14px;}
+  .settingRow label{width:76px; text-align:left; color:#cfe6fa; flex:none;}
+  .settingRow input[type=range]{flex:1; accent-color:var(--acc);}
+  .settingRow .val{width:34px; color:var(--acc); flex:none;}
+  .seg{display:flex; gap:6px; justify-content:center; margin:4px 0 10px;}
+  .seg button{flex:1;}
+  .seg button.on{background:linear-gradient(180deg,#3a5a1f,#2a4a14); border-color:#9fc76a; color:#d9ffb0;}
+  .chk{display:flex; align-items:center; gap:8px; justify-content:center; font-size:14px; margin:8px 0;}
+  .stat{font-size:14px; line-height:2; text-align:left; padding-left:8px; color:#cfe6fa;}
+  .stat b{color:var(--acc);}
+  .bigTitle{font-size:26px; color:#ff6f6f; text-shadow:0 0 16px #ff404066; letter-spacing:2px;}
+  @media (pointer:coarse), (max-width:760px){
+    .cd{min-height:0;}
+  }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="cv" width="480" height="640"></canvas>
+
+  <!-- 触屏操作层（JS 控制显示） -->
+  <div id="tc">
+    <button id="bBomb" type="button"><span>灵符</span><i id="bBombN">×0</i></button>
+    <button id="bPauseT" type="button">暂停</button>
+  </div>
+
+  <!-- 标题界面 -->
+  <div id="scn-title" class="scn">
+    <div class="panel">
+      <h1 class="logo">幻想乡弹幕演武</h1>
+      <div class="sub">～ Stage 1 「雾之湖畔的异变调查」 ～</div>
+      <div class="cards" id="cards"></div>
+      <div class="row" style="margin:-2px 0 4px">
+        <button id="bPick" class="btn mini">本机选图立绘</button>
+        <button id="bResetPort" class="btn mini">恢复默认立绘</button>
+      </div>
+      <input type="file" id="portFile" accept="image/*" style="display:none">
+      <div class="btns">
+        <button id="bStart" class="btn big">开 始 游 戏</button>
+        <div class="row">
+          <button id="bSet" class="btn">设 置</button>
+          <button id="bHelp" class="btn">操 作</button>
+        </div>
+      </div>
+      <div id="helpBox" class="help hidden">
+        <b>电脑</b>：方向键/WASD 移动　Shift 低速　Z/J 射击　X/K 符卡　Esc/P 暂停
+        <br><b>手机</b>：按住屏幕拖动即移动（自动射击）；<b>双指按住 = 低速</b>
+        <br><b>符卡/炸弹</b>：右下角按钮　　<b>暂停</b>：右下「暂停」钮
+        <br>贴脸擦弹可获得擦弹分；符卡击破奖励丰厚。加油！
+      </div>
+      <div class="ver">同人练习作 · 东方 Project 风弹幕一面 · 请支持原作
+        <br>自定义立绘：本机选图（按钮）或存为 html 旁 <b>chars/reimu.png、chars/marisa.png、chars/sanae.png</b>（jpg 亦可）；大小位置在「设置」里调。
+        <br>自定义 BGM：html 旁建 <b>bgm/</b> 文件夹，放入 <b>title/stage/boss/clear.mp3</b>（wav/ogg 亦可），刷新即自动采用，无文件时用内置合成曲。</div>
+    </div>
+  </div>
+
+  <!-- 设置 -->
+  <div id="scn-set" class="scn hidden">
+    <div class="panel">
+      <h1 class="logo" style="font-size:22px">设 置</h1>
+      <div class="settingRow"><label>音乐音量</label>
+        <input id="sMus" type="range" min="0" max="100" value="60"><span class="val" id="vMus">60</span></div>
+      <div class="settingRow"><label>音效音量</label>
+        <input id="sSfx" type="range" min="0" max="100" value="80"><span class="val" id="vSfx">80</span></div>
+      <div class="settingRow"><label>主音量</label>
+        <input id="sMst" type="range" min="0" max="100" value="90"><span class="val" id="vMst">90</span></div>
+      <div style="text-align:left; font-size:14px; margin-top:4px; color:#cfe6fa">难度</div>
+      <div class="seg" id="segDiff">
+        <button data-d="easy" class="btn mini">简单</button>
+        <button data-d="normal" class="btn mini">普通</button>
+        <button data-d="hard" class="btn mini">困难</button>
+      </div>
+      <div class="chk"><input id="cHit" type="checkbox"><label for="cHit">触屏时显示自机判定点</label></div>
+      <div class="chk"><input id="cVib" type="checkbox"><label for="cVib">触屏震动反馈（手机）</label></div>
+      <div style="text-align:left; font-size:14px; margin-top:4px; color:#cfe6fa">立绘显示（标题选人卡）</div>
+      <div class="settingRow"><label>立绘缩放</label>
+        <input id="sZoom" type="range" min="40" max="180" step="5" value="100"><span class="val" id="vZoom">100%</span></div>
+      <div class="settingRow"><label>上下位置</label>
+        <input id="sPoff" type="range" min="-60" max="60" step="5" value="0"><span class="val" id="vPoff">0</span></div>
+      <div class="chk"><input id="cFit" type="checkbox"><label for="cFit">立绘完整显示（不裁切，适合全身图）</label></div>
+      <div class="btns"><button id="bSetBack" class="btn">返 回</button></div>
+    </div>
+  </div>
+
+  <!-- 暂停 -->
+  <div id="scn-pause" class="scn hidden">
+    <div class="panel">
+      <div class="sub" style="font-size:18px">休 息 一 下</div>
+      <div class="btns">
+        <button id="bResume" class="btn big">继 续</button>
+        <button id="bPauseSet" class="btn">设 置</button>
+        <button id="bRetry" class="btn">重开本面</button>
+        <button id="bQuit" class="btn">回 到 标 题</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 结束 -->
+  <div id="scn-over" class="scn hidden">
+    <div class="panel">
+      <div class="bigTitle">游 戏 结 束</div>
+      <div class="sub" id="overMsg">「不知名的妖怪退治失败了…」</div>
+      <div class="stat" id="overStat"></div>
+      <div class="btns">
+        <button id="bRetry2" class="btn big">再 来 一 次</button>
+        <button id="bQuit2" class="btn">回 到 标 题</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通关 -->
+  <div id="scn-clear" class="scn hidden">
+    <div class="panel">
+      <h1 class="logo">面 关 通 过！</h1>
+      <div class="sub">「雾之湖畔的调查，圆满完成！」</div>
+      <div class="stat" id="clearStat"></div>
+      <div class="btns">
+        <button id="bAgain" class="btn big">再 来 一 面</button>
+        <button id="bQuit3" class="btn">回 到 标 题</button>
+      </div>
+    </div>
+  </div>
+</div>
